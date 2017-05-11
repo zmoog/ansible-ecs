@@ -1,0 +1,27 @@
+- name: "Example playbook showing usage of ecs_task_info module"
+  hosts: localhost
+  connection: local
+  gather_facts: False
+
+  tasks:
+    - name: "List existing tasks in the ECS cluster"
+      ecs_task_info:
+        cluster: "tfm-dev-main-cluster"
+        family: "tfm-backend"
+      register: result
+
+    - debug:
+        var: result
+
+    - name: "Stop the ECS Task"
+      ecs_task:
+        operation: stop
+        cluster: tfm-dev-main-cluster
+        task_definition: tfm-backend
+        task: "{{ item }}"
+      with_items: "{{ result.taskArns }}"
+      register: stop_result
+
+    - debug:
+        var: stop_result
+
